@@ -4,7 +4,7 @@ from .modelos.modelos import *
 
 router = APIRouter()
 
-conn = sqlite3.connect('dados_farmacia.db')
+conn = sqlite3.connect("dados_farmacia.db")
 cursor = conn.cursor()
 
 # CRUD Farmacias

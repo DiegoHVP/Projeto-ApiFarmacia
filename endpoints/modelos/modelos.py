@@ -23,6 +23,7 @@ class Funcionario(BaseModel):
 class Fornecedor(BaseModel):
     nome: str
     contato: str
+    medicamento_id: Optional[int] = None
 
 class Cliente(BaseModel):
     nome: str

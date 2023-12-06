@@ -31,15 +31,17 @@ _funcionario = """CREATE TABLE IF NOT EXISTS Funcionario (
     u_nome TEXT,
     cpf TEXT,
     unidade_trabalho TEXT,
-    controle_farmacia INTEGER,
-    FOREIGN KEY (controle_farmacia) REFERENCES Farmacia(id)
+    controle_farmacia INTEGER
 );"""
 
 _fornecedores = """CREATE TABLE IF NOT EXISTS Fornecedores (
     id INTEGER PRIMARY KEY,
     nome TEXT,
-    contato TEXT
+    contato TEXT,
+    medicamento_id INTEGER,
+    FOREIGN KEY (medicamento_id) REFERENCES Medicamento(id)
 );"""
+
 
 _cliente = """CREATE TABLE IF NOT EXISTS Cliente (
     id INTEGER PRIMARY KEY,
@@ -53,14 +55,16 @@ _cliente = """CREATE TABLE IF NOT EXISTS Cliente (
     FOREIGN KEY (cadastro_farmacia) REFERENCES Farmacia(id)
 );"""
 
-conn = sqlite3.connect('dados_farmacia.db')
-cursor = conn.cursor()
 try:
+    conn = sqlite3.connect("dados_farmacia.db")
+    cursor = conn.cursor()
     cursor.execute(_farmacia)
     cursor.execute(_medicamento)
     cursor.execute(_funcionario)
     cursor.execute(_fornecedores)
     cursor.execute(_cliente)
     conn.commit()
-except Exception as e:
-    print("error"+ str(e) )
+except sqlite3.Error as e:
+    print("Erro ao executar query SQL:", e)
+finally:
+    conn.close()

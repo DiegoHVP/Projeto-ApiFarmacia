@@ -4,7 +4,7 @@ from .modelos.modelos import *
 
 router = APIRouter()
 
-conn = sqlite3.connect('dados_farmacia.db')
+conn = sqlite3.connect("dados_farmacia.db")
 cursor = conn.cursor()
 
 # CRUD Fornecedor
@@ -12,8 +12,8 @@ cursor = conn.cursor()
 @router.post("/fornecedores/")
 async def create_fornecedor(fornecedor: Fornecedor):
     try:
-        query = "INSERT INTO Fornecedores (nome, contato) VALUES (?, ?)"
-        values = (fornecedor.nome, fornecedor.contato)
+        query = "INSERT INTO Fornecedores (nome, contato, medicamento_id) VALUES (?, ?, ?)"
+        values = (fornecedor.nome, fornecedor.contato, fornecedor.medicamento_id)
         print(values)
         cursor.execute(query, values)
         conn.commit()
@@ -34,7 +34,8 @@ async def get_fornecedor(id: int):
         fornecedorDados = {
             "id": dadosOne[0],
             "nome": dadosOne[1],
-            "contato": dadosOne[2] 
+            "contato": dadosOne[2] ,
+            "medicamento_id": dadosOne[3]
         }
         
         return {"Fornecedor": fornecedorDados}
@@ -56,7 +57,8 @@ async def get_fornecedores():
             dadosOne = {
                 "id": dadosOne[0],
                 "nome": dadosOne[1],
-                "contato": dadosOne[2]
+                "contato": dadosOne[2],
+                "medicamento_id": dadosOne[3]
             }
             fornecedoresDados.append(dadosOne)
 
