@@ -1,6 +1,6 @@
 
 import sqlite3
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, status
 from .modelos.modelos import *
 
 router = APIRouter()
@@ -10,7 +10,7 @@ cursor = conn.cursor()
 
 # CRUD Funcionario
 # ADD Funcionario
-@router.post("/funcionarios/")
+@router.post("/funcionarios/", status_code=status.HTTP_201_CREATED)
 async def create_funcionario(funcionario: Funcionario):
     try:
         query = """INSERT INTO Funcionario 

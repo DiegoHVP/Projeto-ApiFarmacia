@@ -1,5 +1,5 @@
 import sqlite3
-from fastapi import APIRouter
+from fastapi import APIRouter, status
 from .modelos.modelos import *
 
 router = APIRouter()
@@ -9,7 +9,7 @@ cursor = conn.cursor()
 
 # CRUD Farmacias
 # ADD Farmarcias
-@router.post("/farmacia")
+@router.post("/farmacia", status_code=status.HTTP_201_CREATED)
 async def add_farmacia(farmacia: Farmacia):
     try:
         query = """INSERT INTO Farmacia (nome, local) VALUES (?, ?)"""

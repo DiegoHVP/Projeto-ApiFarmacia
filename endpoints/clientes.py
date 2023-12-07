@@ -1,6 +1,6 @@
 
 import sqlite3
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, status
 from .modelos.modelos import *
 
 router = APIRouter()
@@ -11,7 +11,7 @@ cursor = conn.cursor()
 
 # CRUD Cliente
 # CRIAR Cliente
-@router.post("/clientes/")
+@router.post("/clientes/", status_code=status.HTTP_201_CREATED)
 async def create_cliente(c: Cliente):
     try:
         query = """INSERT INTO Cliente
