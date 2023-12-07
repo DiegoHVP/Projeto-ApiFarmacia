@@ -10,7 +10,7 @@ cursor = conn.cursor()
 
 # CRUD Funcionario
 # ADD Funcionario
-@router.post("/funcionarios/", status_code=status.HTTP_201_CREATED)
+@router.post("/funcionario/", status_code=status.HTTP_201_CREATED)
 async def create_funcionario(funcionario: Funcionario):
     try:
         query = """INSERT INTO Funcionario 
@@ -27,7 +27,7 @@ async def create_funcionario(funcionario: Funcionario):
         return {"error": str(e)}
 
 # LER Funcionario POR Matricula
-@router.get("/funcionarios/{matricula}")
+@router.get("/funcionario/{matricula}")
 async def get_funcionario(matricula: int):
     try:
         query = "SELECT * FROM Funcionario WHERE matricula = ?"
@@ -48,7 +48,7 @@ async def get_funcionario(matricula: int):
         return {"error": str(e)}
 
 # PEGAR TODOS OS Funcionarios
-@router.get("/funcionarios/")
+@router.get("/funcionario/")
 async def getAll_funcionarios():
     try:
         query = "SELECT * FROM Funcionario"
@@ -68,12 +68,16 @@ async def getAll_funcionarios():
             }
             funcionarioDados.append(tempDados)
 
-        return {"funcionarios": funcionarioDados}
+        if len(funcionarioDados)!=0:
+            return {"Funcionarios" : funcionarioDados}
+        else:
+            return {"message":"não há funcionarios cadastrados"}
+
     except Exception as e:
         return {"error": str(e)}
 
 # ATUALIZAR Funcionario POR Matricula
-@router.put("/funcionarios/{matricula}")
+@router.put("/funcionario/{matricula}")
 async def update_funcionario(matricula: int, funcionario: Funcionario):
     try:
         query = """UPDATE Funcionario SET 
@@ -90,7 +94,7 @@ async def update_funcionario(matricula: int, funcionario: Funcionario):
         return {"error": str(e)}
 
 # DELETAR Funcionario POR Matricula
-@router.delete("/funcionarios/{matricula}")
+@router.delete("/funcionario/{matricula}")
 async def delete_funcionario(matricula: int):
     try:
         getNameQuery = "SELECT p_nome FROM Funcionario WHERE matricula = ?" 

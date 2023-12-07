@@ -11,7 +11,7 @@ cursor = conn.cursor()
 
 # CRUD para Medicamento
 # ADD Medicamento
-@router.post("/medicamentos/", status_code=status.HTTP_201_CREATED)
+@router.post("/medicamento/", status_code=status.HTTP_201_CREATED)
 async def create_medicamento(m: Medicamento):
     try:
         query = """INSERT INTO Medicamento 
@@ -30,7 +30,7 @@ async def create_medicamento(m: Medicamento):
         return {"error": str(e)}
 
 # LER Medicamento POR ID
-@router.get("/medicamentos/{id}")
+@router.get("/medicamento/{id}")
 async def get_medicamento(id: int):
     try:
         query = "SELECT * FROM Medicamento WHERE id = ?"
@@ -57,15 +57,13 @@ async def get_medicamento(id: int):
         return {"error": str(e)}
 
 # LER TODOS OS Medicamento
-@router.get("/medicamentos/")
-async def get_medicamento():
+@router.get("/medicamento/")
+async def getAll_medicamento():
     try:
         query = "SELECT * FROM Medicamento"
         cursor.execute(query)
         dadosAll = cursor.fetchall()
         
-        if not dadosAll:
-            raise HTTPException(status_code=404, detail="Medicamentos não encontrado")
         
         medicamentosDados = []
         for dadosOne in dadosAll:
@@ -82,12 +80,17 @@ async def get_medicamento():
                 "farmacia_id": dadosOne[9]
             }
             medicamentosDados.append(tempDados)
-        return {"Medicamento": medicamentosDados}
+
+        if len(medicamentosDados)!=0:
+            return {"Medicamentos" : medicamentosDados}
+        else:
+            return {"message":"não há medicamentos cadastrados"}
+        
     except Exception as e:
         return {"error": str(e)}
 
 # ATUALIZAR Medicamento POR ID
-@router.put("/medicamentos/{id}")
+@router.put("/medicamento/{id}")
 async def update_medicamento(id: int, m: Medicamento):
     try:
         query = """UPDATE Medicamento SET 
@@ -107,7 +110,7 @@ async def update_medicamento(id: int, m: Medicamento):
 
 
 # DELETAR Medicamento POR ID
-@router.delete("/medicamentos/{id}")
+@router.delete("/medicamento/{id}")
 async def delete_medicamento(id: int):
     try:
         query_select = "SELECT * FROM Medicamento WHERE id = ?"

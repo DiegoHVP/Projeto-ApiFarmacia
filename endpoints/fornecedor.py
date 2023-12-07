@@ -9,7 +9,7 @@ cursor = conn.cursor()
 
 # CRUD Fornecedor
 # ADD Fornecedores
-@router.post("/fornecedores/", status_code=status.HTTP_201_CREATED)
+@router.post("/fornecedor/", status_code=status.HTTP_201_CREATED)
 async def create_fornecedor(fornecedor: Fornecedor):
     try:
         query = "INSERT INTO Fornecedores (nome, contato, medicamento_id) VALUES (?, ?, ?)"
@@ -22,7 +22,7 @@ async def create_fornecedor(fornecedor: Fornecedor):
         return {"error": str(e)}
 
 # LER Fornecedor POR ID
-@router.get("/fornecedores/{id}")
+@router.get("/fornecedor/{id}")
 async def get_fornecedor(id: int):
     try:
         query = "SELECT * FROM Fornecedores WHERE id = ?"
@@ -43,8 +43,8 @@ async def get_fornecedor(id: int):
         return {"error": str(e)}
 
 # LER TODOS OS Forncedores
-@router.get("/fornecedores/")
-async def get_fornecedores():
+@router.get("/fornecedor/")
+async def getAll_fornecedores():
     try:
         query = "SELECT * FROM Fornecedores"
         cursor.execute(query)
@@ -61,13 +61,16 @@ async def get_fornecedores():
                 "medicamento_id": dadosOne[3]
             }
             fornecedoresDados.append(dadosOne)
+        if len(fornecedoresDados)!=0:
+            return {"fornecedores" : fornecedoresDados}
+        else:
+            return {"message":"não há fornecedores cadastrados"}
 
-        return {"fornecedores": fornecedoresDados}
     except Exception as e:
         return {"error": str(e)}
 
 # ATUALIZAR Fornecedor por ID
-@router.put("/fornecedores/{id}")
+@router.put("/fornecedor/{id}")
 async def update_fornecedor(id: int, fornecedor: Fornecedor):
     try:
         query_select = "SELECT * FROM Fornecedores WHERE id = ?"
@@ -84,7 +87,7 @@ async def update_fornecedor(id: int, fornecedor: Fornecedor):
         return {"error": str(e)}
 
 # DELETAR Fornecedor POR ID
-@router.delete("/fornecedores/{id}")
+@router.delete("/fornecedor/{id}")
 async def delete_fornecedor(id: int):
     try:
         query_select = "SELECT * FROM Fornecedores WHERE id = ?"

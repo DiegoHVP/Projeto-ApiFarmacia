@@ -1,13 +1,13 @@
 from fastapi import FastAPI
-from endpoints import medicamentos, fornecedores, clientes, funcionarios, farmacias
+from endpoints import medicamento, fornecedor, cliente, funcionario, farmacia
 
 app = FastAPI()
 
-app.include_router(medicamentos.router)
-app.include_router(fornecedores.router)
-app.include_router(clientes.router)
-app.include_router(funcionarios.router)
-app.include_router(farmacias.router)
+app.include_router(medicamento.router)
+app.include_router(fornecedor.router)
+app.include_router(cliente.router)
+app.include_router(funcionario.router)
+app.include_router(farmacia.router)
 
 if __name__ == "__main__":
     from uvicorn import run

@@ -11,7 +11,7 @@ cursor = conn.cursor()
 
 # CRUD Cliente
 # CRIAR Cliente
-@router.post("/clientes/", status_code=status.HTTP_201_CREATED)
+@router.post("/cliente/", status_code=status.HTTP_201_CREATED)
 async def create_cliente(c: Cliente):
     try:
         query = """INSERT INTO Cliente
@@ -30,36 +30,35 @@ async def create_cliente(c: Cliente):
 
 
 # LER Cliente POR ID
-@router.get("/clientes/{cliente_id}")
+@router.get("/cliente/{cliente_id}")
 async def get_cliente(cliente_id: int):
-    try:
-        query = "SELECT * FROM Cliente WHERE id = ?"
-        cursor.execute(query, (cliente_id,))
-        cliente = cursor.fetchone()
-        if not cliente:
-            raise HTTPException(status_code=404, detail="Cliente not found")
-        cliente_Dados = {
-            "id": cliente[0],
-            "nome": cliente[1],
-            "cpf": cliente[2],
-            "telefone": cliente[3],
-            "email": cliente[4],
-            "alergias": cliente[5],
-            "cadastro_farmacia": cliente[6],
-            "forma_pagamento": cliente[7]
-        }
-        return {"Cliente": cliente_Dados}
-    except Exception as e:
-        return {"error": str(e)}
+    query = "SELECT * FROM Cliente WHERE id = ?"
+    cursor.execute(query, (cliente_id,))
+    cliente = cursor.fetchone()
+    if not cliente:
+        raise HTTPException(status_code=404, detail="Cliente não encontrado")
+    cliente_Dados = {
+        "id": cliente[0],
+        "nome": cliente[1],
+        "cpf": cliente[2],
+        "telefone": cliente[3],
+        "email": cliente[4],
+        "alergias": cliente[5],
+        "cadastro_farmacia": cliente[6],
+        "forma_pagamento": cliente[7]
+    }
+    return {"Cliente": cliente_Dados}
+
 
 # PEGAR TODOS OS Clientes
-@router.get("/clientes/")
+@router.get("/cliente/")
 async def getAll_clientes():
     try:
         query = """SELECT * FROM Cliente"""
         cursor.execute(query)
         
         dadosAll = cursor.fetchall()
+
         clientesDados = []
         for dadosOne in dadosAll:
             tempDados = {
@@ -73,13 +72,16 @@ async def getAll_clientes():
                 "forma_pagamento": dadosOne[7]
             }
             clientesDados.append(tempDados)
-        return {"Clientes" : clientesDados}
+        if len(clientesDados)!=0:
+            return {"Clientes" : clientesDados}
+        else:
+            return {"message":"não há clientes cadastrados"}
     except Exception as e:
         return {"error": str(e)}
 
 
 # ATUALIZAR Cliente POR ID
-@router.put("/clientes/{id}")
+@router.put("/cliente/{id}")
 async def update_cliente(id: int, c: Cliente):
     try:
         query = """UPDATE Cliente AS C SET 
@@ -99,7 +101,7 @@ async def update_cliente(id: int, c: Cliente):
 
 
 # DELETAR Cliente POR ID
-@router.delete("/clientes/{cliente_id}")
+@router.delete("/cliente/{cliente_id}")
 async def delete_cliente(cliente_id: int):
     try:
         query_get_name = "SELECT nome FROM Cliente WHERE id = ?" 
@@ -115,6 +117,7 @@ async def delete_cliente(cliente_id: int):
         cursor.execute(query_delete, (cliente_id,))
         conn.commit()
         
+
         return {"message": f"Cliente {nome_cliente} foi deletado do sistema"}
     except Exception as e:
         return {"error": str(e)}

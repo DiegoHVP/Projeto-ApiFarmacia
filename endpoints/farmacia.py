@@ -1,5 +1,5 @@
 import sqlite3
-from fastapi import APIRouter, status
+from fastapi import APIRouter, HTTPException, status
 from .modelos.modelos import *
 
 router = APIRouter()
@@ -56,7 +56,10 @@ async def getAll_farmacia():
                 "local": dadosOne[2]
             }
             FarmaciaDados.append(tempDados)
-        return {"farmacia": FarmaciaDados}
+        if len(FarmaciaDados)!=0:
+            return {"farmacias" : FarmaciaDados}
+        else:
+            return {"message":"não há farmacias cadastradas"}
     
     except Exception as e:
         return {"error": str(e)}
