@@ -34,7 +34,7 @@ async def get_funcionario(matricula: int):
         cursor.execute(query, (matricula,))
         dadosOne = cursor.fetchone()
         if not dadosOne:
-            raise HTTPException(status_code=404, detail="Funcionario not found")
+            raise HTTPException(status_code=404, detail="Funcionario não encontrado")
         funcionarioDados = {
             "matricula": dadosOne[0],
             "p_nome": dadosOne[1],
@@ -53,18 +53,17 @@ async def getAll_funcionarios():
     try:
         query = "SELECT * FROM Funcionario"
         cursor.execute(query)
-        dadosOne = cursor.fetchall()
-        if not dadosOne:
-            raise HTTPException(status_code=404, detail="Funcionario not found")
+        dadosAll = cursor.fetchall()
+
         funcionarioDados = []
-        for dados in dadosOne:
+        for dadosOne in dadosAll:
             tempDados = {
-                "matricula": dados[0],
-                "p_nome": dados[1],
-                "u_nome": dados[2],
-                "cpf": dados[3],
-                "unidade_trabalho": dados[4],
-                "controle_farmacia": dados[5]
+                "matricula": dadosOne[0],
+                "p_nome": dadosOne[1],
+                "u_nome": dadosOne[2],
+                "cpf": dadosOne[3],
+                "unidade_trabalho": dadosOne[4],
+                "controle_farmacia": dadosOne[5]
             }
             funcionarioDados.append(tempDados)
 
@@ -80,6 +79,13 @@ async def getAll_funcionarios():
 @router.put("/funcionario/{matricula}")
 async def update_funcionario(matricula: int, funcionario: Funcionario):
     try:
+        verificar= "SELECT matricula FROM Funcionario WHERE id = ?"
+        cursor.execute(verificar, (matricula,))
+        funcionarioBool = cursor.fetchone()
+
+        if not funcionarioBool:
+            return {"error": f"Funcionario com matricula {matricula} não foi encontrado"}
+
         query = """UPDATE Funcionario SET 
                 p_nome=?, u_nome=?, cpf=?, unidade_trabalho=?, controle_farmacia=?
                 WHERE matricula=?"""

@@ -68,6 +68,16 @@ async def getAll_farmacia():
 @router.put("/farmacia/{id}")
 async def put_farmacia(id: int, farmacia: Farmacia):
     try:
+        verificar= "SELECT id FROM Farmacia WHERE id = ?"
+        cursor.execute(verificar, (id,))
+        farmaciaBool = cursor.fetchone()
+
+        if not farmaciaBool:
+            return {"error": f"Farmacia com ID {id} não foi encontrado"}
+
+
+
+
         query = """UPDATE Farmacia SET nome=?, local=? WHERE id=?"""
         values = (farmacia.nome, farmacia.local, id)
         cursor.execute(query, values)

@@ -32,22 +32,25 @@ async def create_cliente(c: Cliente):
 # LER Cliente POR ID
 @router.get("/cliente/{cliente_id}")
 async def get_cliente(cliente_id: int):
-    query = "SELECT * FROM Cliente WHERE id = ?"
-    cursor.execute(query, (cliente_id,))
-    cliente = cursor.fetchone()
-    if not cliente:
-        raise HTTPException(status_code=404, detail="Cliente não encontrado")
-    cliente_Dados = {
-        "id": cliente[0],
-        "nome": cliente[1],
-        "cpf": cliente[2],
-        "telefone": cliente[3],
-        "email": cliente[4],
-        "alergias": cliente[5],
-        "cadastro_farmacia": cliente[6],
-        "forma_pagamento": cliente[7]
-    }
-    return {"Cliente": cliente_Dados}
+    try:
+        query = "SELECT * FROM Cliente WHERE id = ?"
+        cursor.execute(query, (cliente_id,))
+        dadosOne = cursor.fetchone()
+        if not dadosOne:
+            raise HTTPException(status_code=404, detail="Cliente não encontrado")
+        cliente_Dados = {
+            "id": dadosOne[0],
+            "nome": dadosOne[1],
+            "cpf": dadosOne[2],
+            "telefone": dadosOne[3],
+            "email": dadosOne[4],
+            "alergias": dadosOne[5],
+            "cadastro_farmacia": dadosOne[6],
+            "forma_pagamento": dadosOne[7]
+        }
+        return {"Cliente": cliente_Dados}
+    except Exception as e:
+        return {"error": str(e)}
 
 
 # PEGAR TODOS OS Clientes
@@ -84,6 +87,15 @@ async def getAll_clientes():
 @router.put("/cliente/{id}")
 async def update_cliente(id: int, c: Cliente):
     try:
+        verificar= "SELECT id FROM Cliente WHERE id = ?"
+        cursor.execute(verificar, (id,))
+        clienteBool = cursor.fetchone()
+
+        if not clienteBool:
+            return {"error": f"Cliente com ID {id} não encontrado"}
+
+
+
         query = """UPDATE Cliente AS C SET 
                 nome=?, cpf=?, telefone=?, email=?, alergias=?, 
                 cadastro_farmacia=?, forma_pagamento=?

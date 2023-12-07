@@ -73,16 +73,19 @@ async def getAll_fornecedores():
 @router.put("/fornecedor/{id}")
 async def update_fornecedor(id: int, fornecedor: Fornecedor):
     try:
-        query_select = "SELECT * FROM Fornecedores WHERE id = ?"
-        cursor.execute(query_select, (id,))
-        fornecedorAntigo = cursor.fetchone()
-        NomeFornecedorAntigo = fornecedorAntigo[1] #PEGA NOME
+        verificar = "SELECT id FROM Fornecedores WHERE id = ?"
+        cursor.execute(verificar, (id,))
+        dadosOne = cursor.fetchone()
+
+        if not dadosOne:
+            return {"error": f"Fornecedor com ID {id} não encontrado"}
 
         query = "UPDATE Fornecedores SET nome=?, contato=? WHERE id=?"
         values = (fornecedor.nome, fornecedor.contato, id)
         cursor.execute(query, values)
         conn.commit()
-        return {"message": f"Fornecedor {NomeFornecedorAntigo} foi atualizado"}
+        
+        return {"message": f"Fornecedor {fornecedor.nome} foi atualizado"}
     except Exception as e:
         return {"error": str(e)}
 
