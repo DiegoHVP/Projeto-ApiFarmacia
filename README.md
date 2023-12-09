@@ -1,6 +1,6 @@
 # API de Farmácia
 
-Este projeto consiste na produção em uma API para gerenciar operações de uma farmácia, fornecendo endpoints para manipulação de medicamentos, funcionários, clientes e fornecedores. 
+Este projeto consiste na produção de uma API para gerenciar operações de uma farmácia, fornecendo endpoints para manipulação de medicamentos, funcionários, clientes, fornecedores e compras.
 
 ## Modelos de Entidade e Relacionamento
 ![Modelo ER](./images/modelo_ER.svg)
@@ -73,6 +73,18 @@ Representa informações sobre os medicamentos disponíveis na farmácia.
 | `nome`            | `str`    | Nome do medicamento                                   |
 | `farmacia_id`     | `int`    | ID da farmácia associada ao medicamento (opcional, chave estrangeira)     |
 
+#### Compra
+
+Representa informações sobre as compras realizadas na farmácia.
+
+| Atributo         | Tipo     | Descrição                                   |
+| ---------------- | -------- | ------------------------------------------- |
+| `id`             | `int`    | Identificador único da compra                |
+| `cliente_id`     | `int`    | ID do cliente que realizou a compra(Chaves estrangeiras)          |
+| `medicamento_id` | `int`    | ID do medicamento comprado (Chaves estrangeiras)                  |
+| `data_compra`    | `date`   | Data em que a compra foi realizada           |
+| `quantidade`     | `int`    | Quantidade de medicamento comprada           |
+| `preco_total`    | `float`  | Preço total da compra                        |
 
 ### Modelo de Relacionamento:
 
@@ -80,3 +92,12 @@ Representa informações sobre os medicamentos disponíveis na farmácia.
 - Funcionário tem relação com uma Farmácia
 - Cliente está vinculado a uma Farmácia
 - Medicamento pode ter relação com Fornecedores, Clientes e Farmácia
+- Compra está relacionada a Cliente e Medicamento
+
+## Instalação
+
+Para utilizar esta API, siga estes passos:
+
+1. Clone este repositório.
+2. Instale as dependências com `pip install -r requirements.txt`.
+3. Execute o arquivo `py .\main.py`
