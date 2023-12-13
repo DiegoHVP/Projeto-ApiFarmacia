@@ -16,7 +16,7 @@ Representa informações dos fornecedores que fornecem produtos para a farmácia
 | `id`           | `int`    | Identificador único do fornecedor                        |
 | `nome`         | `str`    | Nome do fornecedor                                      |
 | `contato`      | `str`    | Informações de contato do fornecedor                     |
-| `farmacia_id`  | `int`    | ID da farmácia relacionada ao fornecedor (opcional, chave estrangeira) |
+| `medicamento_id`  | `int`    | ID do medicamento relacionada ao fornecedor (opcional, chave estrangeira) |
 
 #### Farmácia
 
@@ -65,13 +65,16 @@ Representa informações sobre os medicamentos disponíveis na farmácia.
 | `id`              | `int`    | Identificador único do medicamento                     |
 | `vencimento`      | `date`   | Data de vencimento do medicamento (opcional)           |
 | `preco`           | `float`  | Preço do medicamento                                  |
-| `quantidade`      | `int`    | Quantidade disponível do medicamento (opcional)        |
 | `alergias`        | `str`    | Alergias relacionadas ao medicamento (opcional)       |
+| `quantidade`      | `int`    | Quantidade disponível do medicamento (opcional)        |
 | `faixa_etaria`    | `str`    | Faixa etária recomendada para o medicamento (opcional) |
 | `mg_ml`           | `str`    | Miligramas por mililitro do medicamento (opcional)    |
 | `unidade`         | `str`    | Unidade de medida do medicamento (opcional)            |
 | `nome`            | `str`    | Nome do medicamento                                   |
 | `farmacia_id`     | `int`    | ID da farmácia associada ao medicamento (opcional, chave estrangeira)     |
+| `similares`     | `int`    | ID de medicamento simulares ao associado (opcional, chave estrangeira)     |
+| `genericos`     | `int`    | ID de medicamento generico (opcional, chave estrangeira)     |
+| `reabatecer`     | `int`    | ID do fornecedor do medicamento associado  (opcional, chave estrangeira)     |
 
 #### Compra
 
