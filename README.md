@@ -1,6 +1,6 @@
 # API de Farmácia
 
-Este projeto consiste na produção de uma API para gerenciar operações de uma farmácia, fornecendo endpoints para manipulação de medicamentos, funcionários, clientes, fornecedores e compras.
+Este projeto consiste na produção de uma API para gerenciar operações de uma farmácia, fornecendo endpoints para manipulação de medicamentos, funcionários, clientes, fornecedores e compras. Para isso, foi escolhido o uso do framework FastAPI.
 
 ## Modelos de Entidade e Relacionamento
 ![Modelo ER](./images/modelo_ER.svg)
