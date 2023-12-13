@@ -19,7 +19,6 @@ class Medicamento(BaseModel):
     similares: Optional[int] = None
     genericos: Optional[int] = None
     reabastecer: Optional[int] = None
-    compra_cliente: Optional[int] = None
 
 class Funcionario(BaseModel):
     p_nome: str

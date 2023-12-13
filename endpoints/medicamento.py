@@ -15,14 +15,14 @@ cursor = conn.cursor()
 async def create_medicamento(m: Medicamento):
     try:
         query = """INSERT INTO Medicamento 
-                (vencimento, preco, quantidade, alergias, faixa_etaria, mg_ml, unidade, nome, farmacia_id, similares, genericos, reabastecer, compra_cliente) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
+                (vencimento, preco, quantidade, alergias, faixa_etaria, mg_ml, unidade, nome, farmacia_id, similares, genericos, reabastecer) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
         values = ( 
             m.vencimento, m.preco, m.quantidade,
             m.alergias, m.faixa_etaria, m.mg_ml,
             m.unidade, m.nome, m.farmacia_id,
             m.similares, m.genericos,
-            m.reabastecer, m.compra_cliente
+            m.reabastecer
         )
         
         cursor.execute(query, values)
@@ -55,8 +55,7 @@ async def get_medicamento(id: int):
             "farmacia_id": dadosOne[9],
             "similares": dadosOne[10],
             "genericos": dadosOne[11],
-            "reabastecer": dadosOne[12],
-            "compra_cliente": dadosOne[13]
+            "reabastecer": dadosOne[12]
         }
         return {"Medicamento": medicamentoDados}
     except Exception as e:
@@ -85,8 +84,7 @@ async def get_all_medicamento():
                 "farmacia_id": dadosOne[9],
                 "similares": dadosOne[10],
                 "genericos": dadosOne[11],
-                "reabastecer": dadosOne[12],
-                "compra_cliente": dadosOne[13]
+                "reabastecer": dadosOne[12]
             }
             medicamentosDados.append(tempDados)
 
@@ -111,14 +109,14 @@ async def update_medicamento(id: int, medicamento: Medicamento):
 
         query = """UPDATE Medicamento SET 
                 vencimento=?, preco=?, quantidade=?, alergias=?, faixa_etaria=?, 
-                mg_ml=?, unidade=?, nome=?, farmacia_id=?, similares=?, genericos=?, reabastecer=?, compra_cliente=?
+                mg_ml=?, unidade=?, nome=?, farmacia_id=?, similares=?, genericos=?, reabastecer=?
                 WHERE id=?"""
         values = (
             medicamento.vencimento, medicamento.preco, medicamento.quantidade,
             medicamento.alergias, medicamento.faixa_etaria, medicamento.mg_ml,
             medicamento.unidade, medicamento.nome, medicamento.farmacia_id,
             medicamento.similares, medicamento.genericos,
-            medicamento.reabastecer, medicamento.compra_cliente, id
+            medicamento.reabastecer, id
         )
         cursor.execute(query, values)
         conn.commit()

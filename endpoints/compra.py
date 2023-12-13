@@ -13,9 +13,20 @@ cursor = conn.cursor()
 @router.post("/compra/", status_code=status.HTTP_201_CREATED)
 async def create_compra(compra: Compra):
     try:
+        cursor.execute("SELECT * FROM Medicamento WHERE id = ?", (compra.medicamento_id,))
+        medicamentoExiste = cursor.fetchone()
+        if not medicamentoExiste:
+            raise HTTPException(status_code=404, detail="Medicamento informado não encontrado")
+        
+        cursor.execute("SELECT * FROM Cliente WHERE id = ?", (compra.cliente_id,))
+        clienteExiste = cursor.fetchone()
+        if not clienteExiste:
+            raise HTTPException(status_code=404, detail="Cliente informado não encontrado")
+        
         dataSql = datetime.datetime.now().strftime('%Y-%m-%d')
-        query = "INSERT INTO Compra (medicamento_id, data_compra, quantidade, preco_total) VALUES (?, ?, ?, ?)"
+        query = "INSERT INTO Compra (cliente_id, medicamento_id, data_compra, quantidade, preco_total) VALUES (?, ?, ?, ?, ?)"
         values = (
+            compra.cliente_id,
             compra.medicamento_id,
             dataSql,
             compra.quantidade,
@@ -26,6 +37,8 @@ async def create_compra(compra: Compra):
         return {"message": f"Compra registrada com sucesso"}
     except Exception as e:
         return {"error": str(e)}
+
+
 
 # GET Compra POR ID
 @router.get("/compra/{id}")
@@ -85,6 +98,16 @@ async def update_compra(id: int, compra: Compra):
         compraBool = cursor.fetchone()
         if not compraBool:
             return {"error": f"Compra com ID {id} não encontrada"}
+
+        cursor.execute("SELECT * FROM Medicamento WHERE id = ?", (compra.medicamento_id,))
+        medicamentoExiste = cursor.fetchone()
+        if not medicamentoExiste:
+            raise HTTPException(status_code=404, detail="Medicamento informado não encontrado")
+        
+        cursor.execute("SELECT * FROM Cliente WHERE id = ?", (compra.cliente_id,))
+        clienteExiste = cursor.fetchone()
+        if not clienteExiste:
+            raise HTTPException(status_code=404, detail="Cliente informado não encontrado")
 
         query = "UPDATE Compra SET medicamento_id=?, quantidade=?, preco_total=? WHERE id=?"
         values = (

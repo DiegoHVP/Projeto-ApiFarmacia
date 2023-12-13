@@ -8,7 +8,7 @@ conn = sqlite3.connect("dados_farmacia.db")
 cursor = conn.cursor()
 
 # CRUD Fornecedor
-# ADD Fornecedores
+# ADD Fornecedor
 @router.post("/fornecedor/", status_code=status.HTTP_201_CREATED)
 async def create_fornecedor(fornecedor: Fornecedor):
     try:
@@ -60,7 +60,7 @@ async def getAll_fornecedores():
                 "contato": dadosOne[2],
                 "medicamento_id": dadosOne[3]
             }
-            fornecedoresDados.append(dadosOne)
+            fornecedoresDados.append(dadosOne) 
         if len(fornecedoresDados)!=0:
             return {"fornecedores" : fornecedoresDados}
         else:

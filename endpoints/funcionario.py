@@ -79,7 +79,7 @@ async def getAll_funcionarios():
 @router.put("/funcionario/{matricula}")
 async def update_funcionario(matricula: int, funcionario: Funcionario):
     try:
-        verificar= "SELECT matricula FROM Funcionario WHERE id = ?"
+        verificar= "SELECT * FROM Funcionario WHERE matricula = ?"
         cursor.execute(verificar, (matricula,))
         funcionarioBool = cursor.fetchone()
 

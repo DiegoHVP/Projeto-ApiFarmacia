@@ -20,7 +20,6 @@ _medicamento = """CREATE TABLE IF NOT EXISTS Medicamento (
     similares INTEGER,
     genericos INTEGER,
     reabastecer INTEGER,
-    compra_cliente INTEGER,
     FOREIGN KEY (farmacia_id) REFERENCES Farmacia(id),
     FOREIGN KEY (similares) REFERENCES Medicamento(id),
     FOREIGN KEY (genericos) REFERENCES Medicamento(id)

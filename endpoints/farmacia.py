@@ -7,7 +7,7 @@ router = APIRouter()
 conn = sqlite3.connect("dados_farmacia.db")
 cursor = conn.cursor()
 
-# CRUD Farmacias
+# CRUD Farmacia
 # ADD Farmarcias
 @router.post("/farmacia", status_code=status.HTTP_201_CREATED)
 async def add_farmacia(farmacia: Farmacia):
