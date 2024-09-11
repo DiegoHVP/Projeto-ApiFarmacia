@@ -1,48 +1,89 @@
-import sqlite3, datetime
+import sqlite3
+import datetime
 from fastapi import APIRouter, HTTPException, status
-from .modelos.modelos import *
-
+from .modelos.modelos import Compra  # Importa o modelo correto
 
 router = APIRouter()
 
-conn = sqlite3.connect("dados_farmacia.db")
-cursor = conn.cursor()
+# Função auxiliar para obter conexão e cursor
+def get_db_connection():
+    conn = sqlite3.connect("dados_farmacia.db")
+    conn.row_factory = sqlite3.Row
+    return conn, conn.cursor()
 
-# CRUD Compra
 # ADD Compra
 @router.post("/compra/", status_code=status.HTTP_201_CREATED)
 async def create_compra(compra: Compra):
+    conn, cursor = get_db_connection()
     try:
-        cursor.execute("SELECT * FROM Medicamento WHERE id = ?", (compra.medicamento_id,))
-        medicamentoExiste = cursor.fetchone()
-        if not medicamentoExiste:
-            raise HTTPException(status_code=404, detail="Medicamento informado não encontrado")
-        
-        cursor.execute("SELECT * FROM Cliente WHERE id = ?", (compra.cliente_id,))
-        clienteExiste = cursor.fetchone()
-        if not clienteExiste:
-            raise HTTPException(status_code=404, detail="Cliente informado não encontrado")
-        
-        dataSql = datetime.datetime.now().strftime('%Y-%m-%d')
-        query = "INSERT INTO Compra (cliente_id, medicamento_id, data_compra, quantidade, preco_total) VALUES (?, ?, ?, ?, ?)"
-        values = (
-            compra.cliente_id,
-            compra.medicamento_id,
-            dataSql,
-            compra.quantidade,
-            compra.preco_total
-        )
-        cursor.execute(query, values)
-        conn.commit()
-        return {"message": f"Compra registrada com sucesso"}
-    except Exception as e:
-        return {"error": str(e)}
+        # Verificar se todos os medicamentos existem e calcular o preço total
+        preco_total = 0.0
+        for medicamento_id, quantidade in zip(compra.medicamento_ids, compra.quantidade):
+            # BUSCO ELES
+            cursor.execute("SELECT preco, quantidade FROM Medicamento WHERE id = ?", (medicamento_id,))
+            medicamento = cursor.fetchone()
+            # SE NAO EXISTE
+            if not medicamento:
+                raise HTTPException(status_code=404, detail=f"Medicamento com ID {medicamento_id} não encontrado")
 
+            # PEGA PRECO E ESTOQUE
+            preco, estoque_atual = medicamento
+            # SE SUA QUANTIDADE E MENOR QUE O ESTOQUE
+            if quantidade > estoque_atual:
+                raise HTTPException(status_code=400, detail=f"Estoque insuficiente para o medicamento com ID {medicamento_id}")
+
+            # ATUALIZA PRECO TOTAL
+            preco_total += preco * quantidade
+
+
+        # Verificar se a 'quantidade' e 'medicamento_ids' têm o mesmo comprimento
+        if len(compra.medicamento_ids) != len(compra.quantidade):
+            raise HTTPException(status_code=400, detail="A quantidade de IDs dos medicamentos e quantidade não coincide")
+
+        # REGISTRAR COMPRA
+        dataSql = datetime.datetime.now().strftime('%Y-%m-%d')
+        if compra.cliente_id is not None:
+            cursor.execute(
+            "INSERT INTO Compra (cliente_id, data_compra, quantidade, preco_total) VALUES (?, ?, ?, ?)",
+            (compra.cliente_id, dataSql, sum(compra.quantidade), preco_total)
+        )
+        else:
+            cursor.execute(
+            "INSERT INTO Compra (data_compra, quantidade, preco_total) VALUES (?, ?, ?)",
+            (dataSql, sum(compra.quantidade), preco_total)
+            )
+        
+        compra_id = cursor.lastrowid
+
+        # REGISTRAR A LISTA DE COMPRAS COM id DE COMPRA
+        for medicamento_id, quantidade in zip(compra.medicamento_ids, compra.quantidade):
+            cursor.execute(
+                "INSERT INTO Compra_Medicamento (compra_id, medicamento_id, quantidade) VALUES (?, ?, ?)",
+                (compra_id, medicamento_id, quantidade)
+            )
+
+            # ARUALIZA O ESTOQUE
+            cursor.execute("UPDATE Medicamento SET quantidade = quantidade - ? WHERE id = ?", (quantidade, medicamento_id))
+            if cursor.rowcount == 0:
+                raise HTTPException(status_code=404, detail=f"Medicamento com ID {medicamento_id} não encontrado ou estoque insuficiente")
+
+        conn.commit()
+        return {"message": "Compra registrada com sucesso"}
+    except HTTPException as e:
+        # Propaga HTTPExceptions diretamente
+        raise e
+    except Exception as e:
+        # Captura outras exceções e fornece detalhes
+        conn.rollback()
+        return {"error": str(e)}
+    finally:
+        conn.close()
 
 
 # GET Compra POR ID
 @router.get("/compra/{id}")
 async def get_compra(id: int):
+    conn, cursor = get_db_connection()
     try:
         query = "SELECT * FROM Compra WHERE id = ?"
         cursor.execute(query, (id,))
@@ -53,19 +94,26 @@ async def get_compra(id: int):
         compra_info = {
             "id": dadosOne[0],
             "cliente_id": dadosOne[1],
-            "medicamento_id": dadosOne[2],
-            "data_compra": dadosOne[3],
-            "quantidade": dadosOne[4],
-            "preco_total": dadosOne[5]
+            "data_compra": dadosOne[2],
+            "quantidade": dadosOne[3],
+            "preco_total": dadosOne[4]
         }
+        
+        # Recuperar medicamentos da compra
+        cursor.execute("SELECT medicamento_id, quantidade FROM Compra_Medicamento WHERE compra_id = ?", (id,))
+        medicamentos = cursor.fetchall()
+        compra_info["medicamentos"] = [{"medicamento_id": med[0], "quantidade": med[1]} for med in medicamentos]
         
         return {"Compra": compra_info}
     except Exception as e:
         return {"error": str(e)}
+    finally:
+        conn.close()
 
 # GET TODAS AS Compras
 @router.get("/compra/")
 async def get_all_compras():
+    conn, cursor = get_db_connection()
     try:
         query = "SELECT * FROM Compra"
         cursor.execute(query)
@@ -78,64 +126,151 @@ async def get_all_compras():
             compra_info = {
                 "id": dadosOne[0],
                 "cliente_id": dadosOne[1],
-                "medicamento_id": dadosOne[2],
-                "data_compra": dadosOne[3],
-                "quantidade": dadosOne[4],
-                "preco_total": dadosOne[5]
+                "data_compra": dadosOne[2],
+                "quantidade": dadosOne[3],
+                "preco_total": dadosOne[4]
             }
+
+            # Recuperar medicamentos da compra
+            cursor.execute("SELECT medicamento_id, quantidade FROM Compra_Medicamento WHERE compra_id = ?", (dadosOne[0],))
+            medicamentos = cursor.fetchall()
+            compra_info["medicamentos"] = [{"medicamento_id": med[0], "quantidade": med[1]} for med in medicamentos]
+            
             compras_info.append(compra_info)
         
         return {"Compras": compras_info}
     except Exception as e:
         return {"error": str(e)}
+    finally:
+        conn.close()
 
 # ATUALIZAR Compra POR ID
 @router.put("/compra/{id}")
 async def update_compra(id: int, compra: Compra):
+    conn, cursor = get_db_connection()
     try:
         check_query = "SELECT id FROM Compra WHERE id = ?"
         cursor.execute(check_query, (id,))
         compraBool = cursor.fetchone()
         if not compraBool:
-            return {"error": f"Compra com ID {id} não encontrada"}
+            raise HTTPException(status_code=404, detail=f"Compra com ID {id} não encontrada")
 
-        cursor.execute("SELECT * FROM Medicamento WHERE id = ?", (compra.medicamento_id,))
-        medicamentoExiste = cursor.fetchone()
-        if not medicamentoExiste:
-            raise HTTPException(status_code=404, detail="Medicamento informado não encontrado")
-        
-        cursor.execute("SELECT * FROM Cliente WHERE id = ?", (compra.cliente_id,))
-        clienteExiste = cursor.fetchone()
-        if not clienteExiste:
-            raise HTTPException(status_code=404, detail="Cliente informado não encontrado")
+        # Verificar se todos os medicamentos existem
+        for medicamento_id in compra.medicamento_ids:
+            cursor.execute("SELECT * FROM Medicamento WHERE id = ?", (medicamento_id,))
+            if not cursor.fetchone():
+                raise HTTPException(status_code=404, detail=f"Medicamento com ID {medicamento_id} não encontrado")
 
-        query = "UPDATE Compra SET medicamento_id=?, quantidade=?, preco_total=? WHERE id=?"
-        values = (
-            compra.medicamento_id,
-            compra.quantidade,
-            compra.preco_total,
-            id
+        # Verificar se o cliente existe (se fornecido)
+        if compra.cliente_id is not None:
+            cursor.execute("SELECT * FROM Cliente WHERE id = ?", (compra.cliente_id,))
+            if not cursor.fetchone():
+                raise HTTPException(status_code=404, detail="Cliente informado não encontrado")
+
+        # Atualizar a compra
+        dataSql = datetime.datetime.now().strftime('%Y-%m-%d')
+        cursor.execute(
+            "UPDATE Compra SET cliente_id=?, data_compra=?, quantidade=?, preco_total=? WHERE id=?",
+            (compra.cliente_id, dataSql, sum(compra.quantidade), sum(compra.quantidade) * 1.0)  # Ajustar conforme necessário
         )
-        cursor.execute(query, values)
+
+        # Remover entradas antigas de medicamentos e inserir as novas
+        cursor.execute("DELETE FROM Compra_Medicamento WHERE compra_id = ?", (id,))
+        for medicamento_id, quantidade in zip(compra.medicamento_ids, compra.quantidade):
+            cursor.execute(
+                "INSERT INTO Compra_Medicamento (compra_id, medicamento_id, quantidade) VALUES (?, ?, ?)",
+                (id, medicamento_id, quantidade)
+            )
+            
+            # Atualizar estoque do medicamento
+            cursor.execute("UPDATE Medicamento SET quantidade = quantidade - ? WHERE id = ?", (quantidade, medicamento_id))
+            if cursor.rowcount == 0:
+                raise HTTPException(status_code=404, detail=f"Medicamento com ID {medicamento_id} não encontrado ou estoque insuficiente")
+
         conn.commit()
-        
         return {"message": f"Compra com ID {id} foi atualizada"}
+    except HTTPException as e:
+        raise e
     except Exception as e:
+        conn.rollback()
         return {"error": str(e)}
+    finally:
+        conn.close()
 
 # DELETAR Compra POR ID
 @router.delete("/compra/{id}")
 async def delete_compra(id: int):
+    conn, cursor = get_db_connection()
     try:
+        # Verificar se a compra existe
         select_query = "SELECT * FROM Compra WHERE id = ?"
         cursor.execute(select_query, (id,))
         compra_data = cursor.fetchone()
         if not compra_data:
-            return {"error": f"Compra com ID {id} não encontrada"}
+            raise HTTPException(status_code=404, detail=f"Compra com ID {id} não encontrada")
 
+        # Remover medicamentos da compra
+        cursor.execute("DELETE FROM Compra_Medicamento WHERE compra_id = ?", (id,))
+
+        # Remover a compra
         query = "DELETE FROM Compra WHERE id = ?"
         cursor.execute(query, (id,))
         conn.commit()
         return {"message": f"Compra com ID {id} foi deletada"}
+    except HTTPException as e:
+        raise e
     except Exception as e:
+        conn.rollback()
         return {"error": str(e)}
+    finally:
+        conn.close()
+
+
+
+@router.get("/compra/me/{id}")
+async def get_compras(id: int):
+    conn, cursor = get_db_connection()
+    try:
+        # Verificar se o cliente tem compras
+        select_query = "SELECT * FROM Compra WHERE cliente_id = ?"
+        cursor.execute(select_query, (id,))
+        compras_data = cursor.fetchall()
+        
+        if not compras_data:
+            raise HTTPException(status_code=404, detail=f"Nenhuma compra encontrada para o cliente com ID {id}")
+        
+        compras = []
+        for compra_data in compras_data:
+            compra_id = compra_data[0]
+            
+            # Buscar medicamentos associados à compra
+            select_medicamentos_query = """
+            SELECT medicamento_id, quantidade 
+            FROM Compra_Medicamento 
+            WHERE compra_id = ?
+            """
+            cursor.execute(select_medicamentos_query, (compra_id,))
+            medicamentos_data = cursor.fetchall()
+            
+            # Estruturar os dados no formato desejado
+            compra = {
+                "id": compra_data[0],
+                "cliente_id": compra_data[1],
+                "data_compra": compra_data[2],
+                "quantidade": compra_data[3],
+                "preco_total": compra_data[4],
+                "medicamentos": [
+                    {"medicamento_id": med[0], "quantidade": med[1]} for med in medicamentos_data
+                ]
+            }
+            
+            compras.append(compra)
+        
+        return {"Compras": compras}
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        conn.rollback()
+        return {"error": str(e)}
+    finally:
+        conn.close()

@@ -20,18 +20,19 @@ _medicamento = """CREATE TABLE IF NOT EXISTS Medicamento (
     similares INTEGER,
     genericos INTEGER,
     reabastecer INTEGER,
-    FOREIGN KEY (farmacia_id) REFERENCES Farmacia(id),
-    FOREIGN KEY (similares) REFERENCES Medicamento(id),
-    FOREIGN KEY (genericos) REFERENCES Medicamento(id)
+    FOREIGN KEY (farmacia_id) REFERENCES Farmacia(id) ON DELETE CASCADE,
+    FOREIGN KEY (similares) REFERENCES Medicamento(id) ON DELETE CASCADE,
+    FOREIGN KEY (genericos) REFERENCES Medicamento(id) ON DELETE CASCADE
 );"""
 
-_funcionario = """CREATE TABLE IF NOT EXISTS Funcionario (
+_farmaceutico = """CREATE TABLE IF NOT EXISTS Farmaceutico (
     matricula INTEGER PRIMARY KEY AUTOINCREMENT,
     p_nome TEXT,
     u_nome TEXT,
     cpf TEXT,
     unidade_trabalho TEXT,
-    controle_farmacia INTEGER
+    controle_farmacia INTEGER,
+    senha TEXT
 );"""
 
 _fornecedor = """CREATE TABLE IF NOT EXISTS Fornecedores (
@@ -39,7 +40,7 @@ _fornecedor = """CREATE TABLE IF NOT EXISTS Fornecedores (
     nome TEXT,
     contato TEXT,
     medicamento_id INTEGER,
-    FOREIGN KEY (medicamento_id) REFERENCES Medicamento(id)
+    FOREIGN KEY (medicamento_id) REFERENCES Medicamento(id) ON DELETE CASCADE
 );"""
 
 _cliente = """CREATE TABLE IF NOT EXISTS Cliente (
@@ -51,29 +52,40 @@ _cliente = """CREATE TABLE IF NOT EXISTS Cliente (
     alergias TEXT,
     cadastro_farmacia INTEGER,
     forma_pagamento TEXT,
-    FOREIGN KEY (cadastro_farmacia) REFERENCES Farmacia(id)
+    senha TEXT,
+    sobrenome TEXT,
+    FOREIGN KEY (cadastro_farmacia) REFERENCES Farmacia(id) ON DELETE CASCADE
 );"""
 
 _compra = """CREATE TABLE IF NOT EXISTS Compra (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     cliente_id INTEGER,
-    medicamento_id INTEGER,
     data_compra DATE,
     quantidade INTEGER,
     preco_total DECIMAL(10,2),
-    FOREIGN KEY (cliente_id) REFERENCES Cliente(id),
-    FOREIGN KEY (medicamento_id) REFERENCES Medicamento(id)
+    FOREIGN KEY (cliente_id) REFERENCES Cliente(id) ON DELETE CASCADE
 );"""
+
+_compra_medicamento = """CREATE TABLE IF NOT EXISTS Compra_Medicamento (
+    compra_id INTEGER,
+    medicamento_id INTEGER,
+    quantidade INTEGER,
+    PRIMARY KEY (compra_id, medicamento_id),
+    FOREIGN KEY (compra_id) REFERENCES Compra(id) ON DELETE CASCADE,
+    FOREIGN KEY (medicamento_id) REFERENCES Medicamento(id) ON DELETE CASCADE
+);"""
+
 
 try:
     conn = sqlite3.connect("dados_farmacia.db")
     cursor = conn.cursor()
     cursor.execute(_farmacia)
     cursor.execute(_medicamento)
-    cursor.execute(_funcionario)
+    cursor.execute(_farmaceutico)
     cursor.execute(_fornecedor)
     cursor.execute(_cliente)
     cursor.execute(_compra)
+    cursor.execute(_compra_medicamento)
     conn.commit()
 except sqlite3.Error as e:
     print("Erro ao executar query SQL:", e)
