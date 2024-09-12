@@ -125,7 +125,6 @@ Representa informações sobre as compras realizadas na farmácia.
 | DELETE | /cliente/{id}                  | Deleta um cliente específico                     | -                                                | `{ "message": "Cliente Carlos Souza foi deletado do sistema" }` |
 | POST   | /medicamento                   | Adiciona um novo medicamento                     | `{ "nome": "Paracetamol", "preco": 10.0, "quantidade": 100 }` | `{ "message": "Medicamento Paracetamol foi cadastrado" }` |
 | GET    | /medicamento/{id}              | Obtém detalhes de um medicamento específico      | -                                                | `{  "id": 1, "nome": "Paracetamol", "preco": 10.0, "quantidade": 100 }` |
-
 | GET    | /medicamento                   | Obtém todos os medicamentos                     | -                                                | `{ "medicamentos": [ { "id": 1, "nome": "Paracetamol", "preco": 10.0, "quantidade": 100 } ] }` |
 | PUT    | /medicamento/{id}              | Atualiza um medicamento existente               | `{ "nome": "Dipirona", "preco": 12.0, "quantidade": 80 }` | `{ "message": "Medicamento Dipirona foi atualizado com sucesso" }` |
 | DELETE | /medicamento/{id}              | Deleta um medicamento específico                | -                                                | `{ "message": "Medicamento Dipirona foi deletado do sistema" }` |
