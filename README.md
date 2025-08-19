@@ -138,9 +138,9 @@ Representa informações sobre as compras realizadas na farmácia.
 ## Autenticação
 | Método | Endpoint                        | Descrição                                         | Requisição                                        | Resposta                                    |
 |--------|---------------------------------|---------------------------------------------------|--------------------------------------------------|---------------------------------------------|
-| POST   | /cliente/token                        | Fazer login de um Cliente                           | `{"{ headers": {  "Content-Type": "application/json" },  "body": {   "username": "123.456.789-00",   "password": "senha123" } }` | `{  "id": 1, "nome": "Carlos Silva", "cpf": "123.456.789-00"  }` |
+| POST   | /cliente/token                        | Fazer login de um Cliente                           | `{"{ headers": {  "Content-Type": "application/json" },  "body": {   "username": "123.456.789-00",   "password": "senha123" } }` | ` {"access_token": TOKEN_ACESS, "token_type": "bearer"}` |
 | GET   | /cliente/me                        | Pegar Cliente a apartir do token                          | `{ "headers": { "Authorization": "Bearer TOKEN" }` | `{  "id": 1, "nome": "Carlos Silva", "cpf": "123.456.789-00"  }` |
-| POST   | /farmaceutico/token                        | Fazer login do Farmaceutico                  | `{"{ headers": {  "Content-Type": "application/json" },  "body": {   "username": "123.456.789-00",   "password": "senha123" } }` | `{  "matricula": 1, "p_nome": "Dr. João", "u_nome": null,  "cpf": "123.456.789-00", "unidade_trabalho": null, "controle_farmacia": null  }` |
+| POST   | /farmaceutico/token                        | Fazer login do Farmaceutico                  | `{"{ headers": {  "Content-Type": "application/json" },  "body": {   "username": "123.456.789-00",   "password": "senha123" } }` | ` {"access_token": TOKEN_ACESS, "token_type": "bearer"}` |
 | GET   | /farmaceutico/me                        | Pegar Farmaceutico a apartir do token                          | `{ "headers": { "Authorization": "Bearer TOKEN" }` | `{  "matricula": 1, "p_nome": "Dr. João", "u_nome": null,  "cpf": "123.456.789-00", "unidade_trabalho": null, "controle_farmacia": null  }` |
 
 
